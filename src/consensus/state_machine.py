@@ -1,9 +1,9 @@
 """State machine for applying committed log entries"""
 
 from typing import Any, Dict, Optional
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_consensus = kv_logger("kvstore_consensus", "consensus/consensus_log.log", format_style="full")
 
 
@@ -47,6 +47,7 @@ class StateMachine:
             return {"value": value}
         
         else:
+            logger_base.warning(f"Unknown state machine operation: {op}")
             logger_consensus.warning(f"Unknown operation: {op}")
             return {"error": "unknown operation"}
 

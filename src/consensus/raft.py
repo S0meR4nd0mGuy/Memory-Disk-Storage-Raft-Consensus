@@ -9,9 +9,9 @@ from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, important, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_consensus = kv_logger("kvstore_consensus", "consensus/consensus_log.log", format_style="full")
 
 
@@ -110,6 +110,8 @@ class RaftNode:
             and self.current_term == election_term  # nothing changed our term mid-election
         ):
             self.state = NodeState.LEADER
+            logger_base.info(important(f"Node {self.node_id} became leader for term {self.current_term}"))
+            logger_consensus.info(f"Node {self.node_id} became leader for term {self.current_term}")
             next_index = len(self.log)
             self.next_index = {peer.node_id: next_index for peer in peers}
             self.match_index = {peer.node_id: -1 for peer in peers}
@@ -121,6 +123,9 @@ class RaftNode:
             self.voted_for = None
 
         if term < self.current_term:
+            logger_consensus.debug(
+                f"Rejected vote for {candidate_id}: stale term {term}, current term {self.current_term}"
+            )
             return self.current_term, False
 
         my_last_term = self.log[-1].term if self.log else 0
@@ -132,8 +137,10 @@ class RaftNode:
 
         if (self.voted_for is None or self.voted_for == candidate_id) and log_ok:
             self.voted_for = candidate_id
+            logger_consensus.debug(f"Granted vote to {candidate_id} for term {self.current_term}")
             return self.current_term, True
 
+        logger_consensus.debug(f"Rejected vote for {candidate_id} for term {term}")
         return self.current_term, False
 
     async def on_append_entries(
@@ -148,14 +155,23 @@ class RaftNode:
             self.state = NodeState.FOLLOWER
 
         if term < self.current_term:
+            logger_consensus.debug(
+                f"Rejected AppendEntries from {leader_id}: stale term {term}, current term {self.current_term}"
+            )
             return False
         
         self.last_heartbeat = datetime.now(timezone.utc)
         
         # Check if log matches at prev_log_index.
         if prev_log_index >= len(self.log):
+            logger_consensus.debug(
+                f"Rejected AppendEntries from {leader_id}: missing prev_log_index {prev_log_index}"
+            )
             return False
         if prev_log_index >= 0 and self.log[prev_log_index].term != prev_log_term:
+            logger_consensus.debug(
+                f"Rejected AppendEntries from {leader_id}: term mismatch at index {prev_log_index}"
+            )
             return False
         
         appended = 0
@@ -183,6 +199,7 @@ class RaftNode:
         # Update commit index
         if leader_commit > self.commit_index:
             self.commit_index = min(leader_commit, len(self.log) - 1)
+            logger_consensus.debug(f"Node {self.node_id} advanced commit index to {self.commit_index}")
         
         return True
 
@@ -209,6 +226,7 @@ class RaftNode:
         instances for local tests or single-process demos.
         """
         if self.state != NodeState.LEADER:
+            logger_consensus.warning(f"Node {self.node_id} rejected client command because it is not leader")
             return {
                 "status": "error",
                 "error": "not leader",
@@ -259,6 +277,9 @@ class RaftNode:
 
         if successful >= majority:
             self.commit_index = entry.index
+            logger_consensus.info(
+                f"Committed log index {entry.index} in term {entry.term} with {successful}/{total_nodes} acks"
+            )
             for peer in peers:
                 await peer.on_append_entries(
                     leader_id=self.node_id,

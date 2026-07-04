@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="kvstore-raft",
-    version="1.0.0",
+    version="1.1.0",
     description="Distributed Key-Value Store with Raft Consensus",
     author="Your Name",
     packages=find_packages(),

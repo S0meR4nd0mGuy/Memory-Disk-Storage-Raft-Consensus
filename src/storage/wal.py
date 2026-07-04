@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Any
 import os
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_storage = kv_logger("kvstore_storage", "storage/storage_log.log", format_style="full")
 
 
@@ -48,6 +48,7 @@ class WriteAheadLog:
         """Load WAL from disk"""
         log_file = self.log_dir / "entries.jsonl"
         if not log_file.exists():
+            logger_storage.info(f"No WAL file found at {log_file}; starting empty")
             return []
         
         entries = []

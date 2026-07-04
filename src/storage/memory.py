@@ -2,9 +2,9 @@
 
 from typing import Optional, Any
 from .storage import StorageEngine
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_storage = kv_logger("kvstore_storage", "storage/storage_log.log", format_style="full")
 
 
@@ -17,6 +17,7 @@ class InMemoryStorage(StorageEngine):
 
     async def get(self, key: str) -> Optional[Any]:
         """Retrieve value by key"""
+        logger_storage.debug(f"Get key={key}")
         return self.data.get(key)
 
     async def put(self, key: str, value: Any) -> None:

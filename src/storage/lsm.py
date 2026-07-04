@@ -5,9 +5,9 @@ This is a simplified version of what RocksDB/LevelDB use internally.
 
 from typing import Optional, Any, List
 from .storage import StorageEngine
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_storage = kv_logger("kvstore_storage", "storage/storage_log.log", format_style="full")
 
 
@@ -34,6 +34,7 @@ class LSMTree(StorageEngine):
 
     async def get(self, key: str) -> Optional[Any]:
         """Retrieve value by key (checks memtable, then sstables newest-first)"""
+        logger_storage.debug(f"Get key={key}")
         # Memtable is always the newest data
         if key in self.memtable:
             return self.memtable[key]
@@ -69,6 +70,7 @@ class LSMTree(StorageEngine):
         correctly overwrite earlier ones for the same key, then strip
         tombstones only once, at the end.
         """
+        logger_storage.debug(f"Scan range start={start_key}, end={end_key}")
         merged: dict = {}
 
         # Oldest sstables first
@@ -91,6 +93,7 @@ class LSMTree(StorageEngine):
 
         Same merge-then-filter approach as scan(), just without a key range.
         """
+        logger_storage.debug("Creating LSM snapshot")
         merged: dict = {}
 
         for sstable in self.sstables:

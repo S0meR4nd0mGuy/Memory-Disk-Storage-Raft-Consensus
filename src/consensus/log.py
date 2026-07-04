@@ -2,9 +2,9 @@
 
 from typing import List, Optional, Any
 from dataclasses import dataclass
-from src.logging_config import kv_logger
+from src.logging_config import base_logger, kv_logger
 
-logger_base = kv_logger("kvstore_base", "log_file.log")
+logger_base = base_logger()
 logger_consensus = kv_logger("kvstore_consensus", "consensus/consensus_log.log", format_style="full")
 
 

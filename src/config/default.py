@@ -22,7 +22,7 @@ class Config:
     LISTEN_PORT = int(os.getenv("LISTEN_PORT", "5000"))
 
     # API settings
-    API_HOST = os.getenv("API_HOST", "0.0.0.0")
+    API_HOST = os.getenv("API_HOST", "127.0.0.1")
     API_PORT = int(os.getenv("API_PORT", "8000"))
 
     # Logging
