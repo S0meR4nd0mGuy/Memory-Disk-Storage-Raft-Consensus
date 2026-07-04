@@ -54,7 +54,7 @@ async def test_delete_handler():
 @pytest.mark.asyncio
 async def test_main_stack_commits_api_put_through_raft(tmp_path):
     """API writes should commit through Raft and apply to durable storage."""
-    from config.default import Config
+    from src.config.default import Config
     from src.consensus.raft import RaftNode
 
     config = Config()

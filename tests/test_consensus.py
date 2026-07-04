@@ -13,9 +13,9 @@ import pytest
 from src.consensus.raft import RaftNode, NodeState, LogEntry
 
 
-# ---------------------------------------------------------------------------
+
 # Leader election — happy path
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_single_candidate_wins_election_with_unanimous_peers():
@@ -77,9 +77,9 @@ async def test_single_node_cluster_wins_election_trivially():
     assert node1.state == NodeState.LEADER
 
 
-# ---------------------------------------------------------------------------
+
 # Leader election — stepping down / term safety
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_candidate_steps_down_if_peer_has_higher_term():
@@ -111,9 +111,9 @@ async def test_candidate_does_not_win_if_it_becomes_follower_mid_election():
     assert node1.current_term == 10
 
 
-# ---------------------------------------------------------------------------
+
 # RequestVote — safety rules
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_voter_grants_at_most_one_vote_per_term():
@@ -198,9 +198,8 @@ async def test_voter_refuses_candidate_with_shorter_log_at_same_term():
     assert vote is False
 
 
-# ---------------------------------------------------------------------------
+
 # AppendEntries — heartbeats / term handling
-# ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_append_entries_rejects_stale_term():
@@ -295,9 +294,9 @@ async def test_append_entries_advances_commit_index():
     assert node.commit_index == 1
 
 
-# ---------------------------------------------------------------------------
+
 # apply_committed_entries
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_apply_committed_entries_returns_only_newly_committed():

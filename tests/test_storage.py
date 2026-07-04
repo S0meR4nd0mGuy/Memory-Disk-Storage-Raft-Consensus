@@ -13,9 +13,9 @@ from src.storage.wal import WriteAheadLog
 from src.storage.storage import PersistentStorage, Storage_Error
 
 
-# ---------------------------------------------------------------------------
+
 # InMemoryStorage — basic engine contract
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_memory_put_get():
@@ -68,9 +68,8 @@ async def test_memory_snapshot_and_restore():
     assert await engine2.get("b") == "2"
 
 
-# ---------------------------------------------------------------------------
 # LSMTree — basic engine contract
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_lsm_put_get_before_compaction():
@@ -157,9 +156,8 @@ async def test_lsm_restore_replaces_state():
     assert await lsm.get("a") is None  # old state should be gone
 
 
-# ---------------------------------------------------------------------------
+
 # WriteAheadLog — isolated behavior
-# ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_wal_append_and_load(tmp_path):
@@ -197,9 +195,9 @@ async def test_wal_preserves_order(tmp_path):
     assert entries[-1]["value"] == "1-updated"
 
 
-# ---------------------------------------------------------------------------
+
 # PersistentStorage — guard clauses
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_operations_before_recover_raise(tmp_path):
@@ -232,9 +230,9 @@ async def test_recover_is_idempotent(tmp_path):
     assert await storage.get("foo") == "bar"
 
 
-# ---------------------------------------------------------------------------
+
 # PersistentStorage — crash recovery (the core guarantee)
-# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_crash_recovery_put_survives_restart(tmp_path):

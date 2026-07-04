@@ -6,7 +6,7 @@ setup(
     name="kvstore-raft",
     version="1.1.0",
     description="Distributed Key-Value Store with Raft Consensus",
-    author="Your Name",
+    author="S0meR4nd0mGuy",
     packages=find_packages(),
     python_requires=">=3.11",
     install_requires=[

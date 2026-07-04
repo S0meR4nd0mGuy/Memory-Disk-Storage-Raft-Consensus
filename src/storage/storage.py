@@ -59,7 +59,6 @@ class PersistentStorage(StorageEngine):
         self.recovered: bool = False  # Track whether recover() has been called
         self.restored = False
         logger_storage.debug("Initialized persistent storage wrapper")
-        # TODO: anything else you need to track? e.g. has recover() run yet?
 
     async def recover(self) -> None:
         """
@@ -78,7 +77,6 @@ class PersistentStorage(StorageEngine):
         for entry in entries:
             op = entry["op"]
             if op == "put":
-                # go straight to engine, not self.put()
                 await self.engine.put(entry["key"], entry["value"])
             elif op == "delete":
                 await self.engine.delete(entry["key"])
@@ -101,10 +99,6 @@ class PersistentStorage(StorageEngine):
         return await self.engine.get(key)
 
     async def put(self, key: str, value: Any) -> None:
-        """
-        1. Append {"op": "put", "key": key, "value": value} to WAL, awaited
-        2. Only then call self.engine.put(key, value)
-        """
         append_entry = {"op": "put", "key": key, "value": value}
         if not self.recovered:
             logger_storage.warning("Rejected put before recover()")
@@ -114,10 +108,6 @@ class PersistentStorage(StorageEngine):
         logger_storage.debug(f"Persistent put key={key}")
 
     async def delete(self, key: str) -> None:
-        """
-        1. Append {"op": "delete", "key": key} to WAL
-        2. Only then call self.engine.delete(key)
-        """
         append_entry = {"op": "delete", "key": key}
         if not self.recovered:
             logger_storage.warning("Rejected delete before recover()")
@@ -138,7 +128,6 @@ class PersistentStorage(StorageEngine):
     async def snapshot(self) -> dict:
         """
         Pass straight through to engine for now.
-        (Later: this is where you'd also trigger a WAL truncate — not yet.)
         """
         if not self.recovered:
             logger_storage.warning("Rejected snapshot before recover()")
@@ -149,10 +138,7 @@ class PersistentStorage(StorageEngine):
     async def restore(self, snapshot: dict) -> None:
         """
         Pass straight through to engine.
-        Think about: should this also clear/truncate the WAL? Not yet —
-        just note the question for later.
         """
-        # TODO: one-time-only assumption is likely too strict for Raft snapshot-catchup later
         if self.restored:
             logger_storage.warning("Rejected duplicate restore()")
             raise Storage_Error("restore() has already been called")
