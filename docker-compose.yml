@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  node1:
+    build: .
+    container_name: kvstore_node1
+    environment:
+      NODE_ID: node1
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 5001
+      API_PORT: 8001
+      LOG_LEVEL: INFO
+    ports:
+      - "5001:5001"
+      - "8001:8001"
+    networks:
+      - kvstore_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  node2:
+    build: .
+    container_name: kvstore_node2
+    environment:
+      NODE_ID: node2
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 5002
+      API_PORT: 8002
+      LOG_LEVEL: INFO
+    ports:
+      - "5002:5002"
+      - "8002:8002"
+    networks:
+      - kvstore_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  node3:
+    build: .
+    container_name: kvstore_node3
+    environment:
+      NODE_ID: node3
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 5003
+      API_PORT: 8003
+      LOG_LEVEL: INFO
+    ports:
+      - "5003:5003"
+      - "8003:8003"
+    networks:
+      - kvstore_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  node4:
+    build: .
+    container_name: kvstore_node4
+    environment:
+      NODE_ID: node4
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 5004
+      API_PORT: 8004
+      LOG_LEVEL: INFO
+    ports:
+      - "5004:5004"
+      - "8004:8004"
+    networks:
+      - kvstore_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  node5:
+    build: .
+    container_name: kvstore_node5
+    environment:
+      NODE_ID: node5
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 5005
+      API_PORT: 8005
+      LOG_LEVEL: INFO
+    ports:
+      - "5005:5005"
+      - "8005:8005"
+    networks:
+      - kvstore_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  kvstore_network:
+    driver: bridge
